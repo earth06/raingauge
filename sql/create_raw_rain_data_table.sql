@@ -1,1 +1,1 @@
-CREATE TABLE raw_rain_data(data_time TEXT PRIMARY KEY, rain_count INTEGER);
+CREATE TABLE raw_rain_data(date_time TEXT PRIMARY KEY, rain_count INTEGER);
