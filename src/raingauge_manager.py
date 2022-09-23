@@ -58,7 +58,7 @@ class Raingauge():
             self.conn.close()
             self.pi.stop()
 
-    def clean_raw_rain_data(self):
+    def clear_raw_rain_data(self):
         """
         雨量観測の生データの1週間より前を削除する
         """
@@ -67,10 +67,18 @@ class Raingauge():
         sql="DELETE FROM raw_rain_data WHERE date_time <= ?"
         self.cursor(sql, (before_1week,))
 
-    def get_precipitation(self, begin="2022-01-01T00:00:00", end="2022-01-01T23:00:00", freq="H"):
+    def clear_all_raw_rain_data(self):
+        sql="DELETE FROM raw_rain_data"
+        self.cursor(sql)
+
+    def get_precipitation(self, begin=None, end=None, freq="H"):
         """
         rawdataから任意の期間の降水量を求める
         """
+        if begin is None:
+            begin=(datetime.now() - timedelta(days=3)).strftime(self.timefmt)
+        if end is None:
+            end=datetime.now().strftime(self.timefmt)
         sql=f"SELECT * FROM raw_rain_date WHERE date_time BETWEEN '{begin}' AND '{end}'"
         df=pd.read_sql(sql, self.conn)
         df.set_index("date_time", inplace=True)
@@ -80,7 +88,7 @@ class Raingauge():
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument("mode",choices=["obs","anal"])
+    parser.add_argument("mode",choices=["obs","get","clear","clearall"])
     args=parser.parse_args()
 
     if args.mode=="obs":
@@ -88,3 +96,19 @@ if __name__=="__main__":
         observer.set_gpio()
         observer.start_rain_observation()
 
+    elif args.mode=="get":
+        observer=Raingauge()
+        observer.set_db()
+        df=observer.get_precipitation(freq="H")
+        print(df)
+
+    elif args.mode=="clear":
+        observer=Raingauge()
+        observer.set_db()
+        observer.clear_raw_rain_data()
+
+    #降水量観測データを全てクリア    
+    elif args.mode=="clearall":
+        observer=Raingauge()
+        observer.set_db()
+        observer.clear_all_raw_rain_data()
