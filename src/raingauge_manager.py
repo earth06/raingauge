@@ -5,6 +5,7 @@ import pigpio
 from datetime import datetime
 from datetime import timedelta
 import argparse
+import time
 
 class Raingauge():
     
@@ -15,6 +16,7 @@ class Raingauge():
         self.DBFILEPATH="../data/weather.db"
         self.SWITCH_PIN=4
         self.timefmt="%Y-%m-%dT%H:%M:%S"
+        self.time_old=time.time()
         pass
 
     def set_gpio(self):
@@ -29,6 +31,12 @@ class Raingauge():
     def record_rain_mass(self, gpio, level, tick):
         """転倒ますの転倒を検知するとcallbackされてdbに記録する
         """
+        #チャタリング回避
+        time_now=time.time()
+        diff = time_now - self.time_old
+        if diff <= 1:
+            return 0
+        
         conn=sqlite3.connect(self.DBFILEPATH)
         cursor=conn.cursor()
         now=datetime.now().strftime(self.timefmt)
@@ -37,7 +45,9 @@ class Raingauge():
         cursor.execute(sql, obs_data)
         conn.commit()
         conn.close()
-        
+        self.time_old=time_now
+        return 1
+
     def start_rain_observation(self):
         """降水量カウントを開始する"""
         state = self.pi.callback(self.SWITCH_PIN, pigpio.RISING_EDGE, self.record_rain_mass)
