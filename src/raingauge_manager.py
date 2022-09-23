@@ -1,3 +1,4 @@
+from re import I
 import pandas as pd
 import sqlite3
 import pigpio
@@ -12,8 +13,6 @@ class Raingauge():
         dbとのコネクション
         """
         self.DBFILEPATH="../data/weather.db"
-        self.conn=sqlite3.connect(self.DBFILEPATH)
-        self.cursor=self.conn.cursor()
         self.SWITCH_PIN=4
         self.timefmt="%Y-%m-%dT%H:%M:%S"
         pass
@@ -23,15 +22,22 @@ class Raingauge():
         self.pi.set_mode(self.SWITCH_PIN, pigpio.INPUT)
         self.pi.set_pull_up_down(self.SWITCH_PIN, pigpio.PUD_OFF)
 
+    def set_db(self):
+        self.conn=sqlite3.connect(self.DBFILEPATH)
+        self.cursor=self.conn.cursor()        
+
     def record_rain_mass(self, gpio, level, tick):
         """転倒ますの転倒を検知するとcallbackされてdbに記録する
         """
+        conn=sqlite3.connect(self.DBFILEPATH)
+        cursor=conn.cursor()
         now=datetime.now().strftime(self.timefmt)
         obs_data=(now, 1)
         sql="INSERT INTO raw_rain_data VALUES (?, ?)"
-        self.cursor.execute(sql, obs_data)
-        self.conn.commit()
-
+        cursor.execute(sql, obs_data)
+        conn.commit()
+        conn.close()
+        
     def start_rain_observation(self):
         """降水量カウントを開始する"""
         state = self.pi.callback(self.SWITCH_PIN, pigpio.RISING_EDGE, self.record_rain_mass)
