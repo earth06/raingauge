@@ -17,7 +17,7 @@ class Raingauge():
         self.SWITCH_PIN=4
         self.timefmt="%Y-%m-%dT%H:%M:%S"
         self.time_old=time.time()
-        pass
+        self.conn=None
 
     def set_gpio(self):
         self.pi=pigpio.pi()
@@ -65,11 +65,13 @@ class Raingauge():
         before_1week=datetime.now() - timedelta(days=7)
         before_1week=before_1week.strftime(self.timefmt)
         sql="DELETE FROM raw_rain_data WHERE date_time <= ?"
-        self.cursor(sql, (before_1week,))
+        self.cursor.execute(sql, (before_1week,))
+        self.conn.commit()
 
     def clear_all_raw_rain_data(self):
         sql="DELETE FROM raw_rain_data"
-        self.cursor(sql)
+        self.cursor.execute(sql)
+        self.conn.commit()
 
     def get_precipitation(self, begin=None, end=None, freq="H"):
         """
@@ -83,8 +85,12 @@ class Raingauge():
         df=pd.read_sql(sql, self.conn)
         df.set_index("date_time", inplace=True)
         df.index=pd.to_datetime(df.index)
-        df_resample=df.resample(freq).sum().fillna()*0.5
+        df_resample=df.resample(freq).sum().fillna(0.0)*0.5
         return df_resample
+
+    def __del__(self):
+        if self.conn is not None:
+            self.conn.close()
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser()
