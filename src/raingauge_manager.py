@@ -83,7 +83,7 @@ class Raingauge():
         df=pd.read_sql(sql, self.conn)
         df.set_index("date_time", inplace=True)
         df.index=pd.to_datetime(df.index)
-        df_resample=df.resample(freq=freq).sum().fillna()*0.5
+        df_resample=df.resample(freq).sum().fillna()*0.5
         return df_resample
 
 if __name__=="__main__":
