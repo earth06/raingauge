@@ -79,7 +79,7 @@ class Raingauge():
             begin=(datetime.now() - timedelta(days=3)).strftime(self.timefmt)
         if end is None:
             end=datetime.now().strftime(self.timefmt)
-        sql=f"SELECT * FROM raw_rain_date WHERE date_time BETWEEN '{begin}' AND '{end}'"
+        sql=f"SELECT * FROM raw_rain_data WHERE date_time BETWEEN '{begin}' AND '{end}'"
         df=pd.read_sql(sql, self.conn)
         df.set_index("date_time", inplace=True)
         df.index=pd.to_datetime(df.index)
