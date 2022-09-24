@@ -1,4 +1,5 @@
 from re import I
+import textwrap
 import pandas as pd
 import sqlite3
 import pigpio
@@ -11,7 +12,6 @@ class Raingauge():
     
     def __init__(self):
         """
-        dbとのコネクション
         """
         self.DBFILEPATH="../data/weather.db"
         self.SWITCH_PIN=4
@@ -20,18 +20,21 @@ class Raingauge():
         self.conn=None
 
     def set_gpio(self):
+        """setup gpio for rain observation
+        """
         self.pi=pigpio.pi()
         self.pi.set_mode(self.SWITCH_PIN, pigpio.INPUT)
         self.pi.set_pull_up_down(self.SWITCH_PIN, pigpio.PUD_OFF)
 
     def set_db(self):
+        """connect to database file"""
         self.conn=sqlite3.connect(self.DBFILEPATH)
         self.cursor=self.conn.cursor()        
 
     def record_rain_mass(self, gpio, level, tick):
-        """転倒ますの転倒を検知するとcallbackされてdbに記録する
+        """callback function to record bucket tipping count to db
         """
-        #チャタリング回避
+        #avoid chattering
         time_now=time.time()
         diff = time_now - self.time_old
         if diff <= 1:
@@ -49,7 +52,7 @@ class Raingauge():
         return 1
 
     def start_rain_observation(self):
-        """降水量カウントを開始する"""
+        """observing rain"""
         state = self.pi.callback(self.SWITCH_PIN, pigpio.RISING_EDGE, self.record_rain_mass)
         try:
             while True:
@@ -59,8 +62,7 @@ class Raingauge():
             self.pi.stop()
 
     def clear_raw_rain_data(self):
-        """
-        雨量観測の生データの1週間より前を削除する
+        """delete raw observed data more than 1 week before from db
         """
         before_1week=datetime.now() - timedelta(days=7)
         before_1week=before_1week.strftime(self.timefmt)
@@ -69,13 +71,22 @@ class Raingauge():
         self.conn.commit()
 
     def clear_all_raw_rain_data(self):
+        """delete all raw observed data from db
+        """
         sql="DELETE FROM raw_rain_data"
         self.cursor.execute(sql)
         self.conn.commit()
 
     def get_precipitation(self, begin=None, end=None, freq="H"):
-        """
-        rawdataから任意の期間の降水量を求める
+        """calc precip mass per custom frequency
+        
+        Args:
+            begin(str): begin of sample data,('YYYY-MM-DD hh:mm:ss')
+            end(str): end of sample data, ('YYYY-MM-DD hh:mm:ss')
+            freq(str): frequency of sample,{"H","D"...,default,}
+        Return:
+            pd.DataFrame: resampled precipitation dataframe
+            
         """
         if begin is None:
             begin=(datetime.now() - timedelta(days=3)).strftime(self.timefmt)
@@ -93,8 +104,16 @@ class Raingauge():
             self.conn.close()
 
 if __name__=="__main__":
-    parser=argparse.ArgumentParser()
-    parser.add_argument("mode",choices=["obs","get","clear","clearall"])
+    args_help=textwrap.dedent("""
+    select runnning mode
+        obs : observing rain by gpio
+        get : print observed hourly precipitaion
+        clear, clearall : delete old raw observed data
+    """)
+    parser=argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument("mode",choices=["obs","get","clear","clearall"],help=args_help
+    
+    )
     args=parser.parse_args()
 
     if args.mode=="obs":
@@ -112,8 +131,7 @@ if __name__=="__main__":
         observer=Raingauge()
         observer.set_db()
         observer.clear_raw_rain_data()
-
-    #降水量観測データを全てクリア    
+   
     elif args.mode=="clearall":
         observer=Raingauge()
         observer.set_db()
