@@ -46,6 +46,7 @@ class Raingauge():
         conn.commit()
         conn.close()
         self.time_old=time_now
+        print(time_now, "counted")
         return 1
 
     def start_rain_observation(self):

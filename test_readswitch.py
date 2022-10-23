@@ -11,3 +11,9 @@ def is_switch_on(gpio, level, tick):
     print(gpio,level, tick)
 
 chck=pi.callback(SWITCH_PIN, pigpio.RISING_EDGE, is_switch_on)
+
+try:
+    while True:
+        pass
+except Exception:
+    pass
