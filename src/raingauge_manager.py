@@ -98,7 +98,13 @@ class Raingauge():
         df.set_index("date_time", inplace=True)
         df.index=pd.to_datetime(df.index)
         df_resample=df.resample(freq).sum().fillna(0.0)*0.5
-        return df_resample
+        
+        df_output=pd.DataFrame(index=pd.date_range(begin,end, freq=freq))
+        df_output.index.name="date_time"
+        df_output=pd.merge(df_output, df_resample, how="left", left_index=True, right_index=True)
+        df_output.rename(columns={"rain_count":"precip_mm"}, inplace=True)
+        df_output["precip_mm"]=df_output["precip_mm"].fillna(0)
+        return df_output
 
     def __del__(self):
         if self.conn is not None:
