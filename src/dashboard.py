@@ -55,4 +55,4 @@ def update_figure(date_button):
     return fig
 
 if __name__=="__main__":
-    app.run_server(debug=True, port=8050,host="localhost")
+    app.run_server(port=8050, host="100.80.66.98")
