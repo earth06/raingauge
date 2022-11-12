@@ -50,7 +50,6 @@ class AQM0802:
         sleep(0.001)
 
     def newline(self):
-        global position
         if self.line == self.display_lines-1:
             self.clear()
         else:
@@ -70,7 +69,7 @@ class AQM0802:
         elif self.position == self.chars_per_line*(self.line+1):
             self.newline()
         self.bus.write_byte_data(self.address_aqm0802a, self.register_display, byte_data)
-        position += 1 
+        self.position += 1 
     
     def check_writable(self,c):
         if c >= 0x20 and c <= 0x7d :
