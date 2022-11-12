@@ -1,0 +1,9 @@
+[Unit]
+Description=run raingauge observation
+
+[Service]
+ExecStart=/home/takato/Git/raingauge/run_obs.sh
+Restart=on-success
+
+[Install]
+WantedBy=multi-user.target
