@@ -14,7 +14,7 @@ class Raingauge():
         """
         """
         self.DBFILEPATH="../data/weather.db"
-        self.SWITCH_PIN=4
+        self.SWITCH_PIN=24
         self.timefmt="%Y-%m-%dT%H:%M:%S"
         self.time_old=time.time()
         self.conn=None
@@ -37,8 +37,8 @@ class Raingauge():
         #avoid chattering
         time_now=time.time()
         diff = time_now - self.time_old
-        if diff <= 1:
-            return 0
+        if diff <= 0.5:
+            return 1
          
         conn=sqlite3.connect(self.DBFILEPATH)
         cursor=conn.cursor()
@@ -50,7 +50,7 @@ class Raingauge():
         conn.close()
         self.time_old=time_now
         print(time_now, "counted")
-        return 1
+        return 0
 
     def start_rain_observation(self):
         """observing rain"""

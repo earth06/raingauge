@@ -31,7 +31,9 @@ class RaingaugeLCD(Raingauge):
 
 
     def record_rain_mass(self, gpio, level, tick):
-        super().record_rain_mass(gpio, level, tick)
+        is_chat=super().record_rain_mass(gpio, level, tick)
+        if is_chat:
+            return 1
         self.COUNT+=1
         precip=self.COUNT*0.5
         s_precip=f"{precip:.1f}"
