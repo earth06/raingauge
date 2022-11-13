@@ -45,6 +45,9 @@ class RaingaugeLCD(Raingauge):
             return 0
         self.COUNT=0
         return 0
+    def start_rain_observation_with_counter(self):
+        state2=self.pi.callback(self.COUNT_RESET_PIN, pigpio.RISING_EDGE, self.reset_counter)
+        super().start_rain_observation()
     
     def __del__(self):
         self.aqm0802.clear()
