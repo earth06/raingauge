@@ -39,7 +39,7 @@ class Raingauge():
         diff = time_now - self.time_old
         if diff <= 1:
             return 0
-        
+         
         conn=sqlite3.connect(self.DBFILEPATH)
         cursor=conn.cursor()
         now=datetime.now().strftime(self.timefmt)
