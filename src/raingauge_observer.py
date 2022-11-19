@@ -22,7 +22,8 @@ class RaingaugeLCD(Raingauge):
         self.init_lcd_label=f"precip: {0.0:>6}mm"
         self.aqm0802=AQM0802()
         self.aqm0802.setup_aqm0802a()
-        self.aqm0802.write_string("---------->ready--")
+        self.aqm0802.clear()
+        self.aqm0802.write_string(">ready---")
 
     def set_gpio(self):
         super().set_gpio()
@@ -62,7 +63,7 @@ class RaingaugeLCD(Raingauge):
         return 0
 
     def shutdown(self, gpio, level, tick):
-        time_now=time.time()
+        time_now=datetime.now()
         self.aqm0802.clear()
         self.aqm0802.write_string("shutdown @"+time_now.strftime("%H:%M"))
         res=subprocess.call('sudo /sbin/shutdown +10')
