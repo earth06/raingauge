@@ -38,7 +38,7 @@ class Raingauge():
         time_now=time.time()
         diff = time_now - self.time_old
         if diff <= 1.1:
-            return 1
+            return True
          
         conn=sqlite3.connect(self.DBFILEPATH)
         cursor=conn.cursor()
@@ -50,7 +50,7 @@ class Raingauge():
         conn.close()
         self.time_old=time_now
         print(time_now, "counted")
-        return 0
+        return False
 
     def start_rain_observation(self):
         """observing rain"""

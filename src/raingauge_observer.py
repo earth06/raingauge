@@ -2,6 +2,9 @@ import time
 from datetime import datetime
 from datetime import timedelta
 import argparse
+import sys
+import os
+import subprocess
 
 from raingauge_manager import Raingauge
 from aqm0802 import AQM0802
@@ -13,12 +16,13 @@ class RaingaugeLCD(Raingauge):
         super().__init__()
         self.COUNT=0
         self.COUNT_RESET_PIN=27
+        self.SHUTDOWN_PIN=21
         self.LCD_LED_PIN=17
         self.last_count_reset_time=time.time()
         self.init_lcd_label=f"precip: {0.0:>6}mm"
         self.aqm0802=AQM0802()
         self.aqm0802.setup_aqm0802a()
-        self.aqm0802.write_string("obs start")
+        self.aqm0802.write_string("---------->ready--")
 
     def set_gpio(self):
         super().set_gpio()
@@ -29,6 +33,9 @@ class RaingaugeLCD(Raingauge):
         #LED button
         self.aqm0802.set_gpio(self.pi, self.LCD_LED_PIN)
 
+        #shutdown button
+        self.pi.set_mode(self.SHUTDOWN_PIN, pigpio.INPUT)
+        self.pi.set_pull_up_down(self.SHUTDOWN_PIN, pigpio.PUD_DOWN)
 
     def record_rain_mass(self, gpio, level, tick):
         is_chat=super().record_rain_mass(gpio, level, tick)
@@ -53,9 +60,16 @@ class RaingaugeLCD(Raingauge):
         self.aqm0802.write_string(self.init_lcd_label)
         self.last_count_reset_time=time_now
         return 0
+    def shutdown(self, gpio, level, tick):
+        time_now=time.time()
+        self.aqm0802.clear()
+        self.aqm0802.write_string("shutdown @"+time_now.strftime("%H:%M"))
+        res=subprocess.call('sudo shutdown +10')
+        exit()
 
     def start_rain_observation_with_counter(self):
         state2=self.pi.callback(self.COUNT_RESET_PIN, pigpio.RISING_EDGE, self.reset_counter)
+        state3=self.pi.callback(self.SHUTDOWN_PIN, pigpio.RISING_EDGE, self.shutdown)
         super().start_rain_observation()
     
     def __del__(self):
