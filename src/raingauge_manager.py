@@ -37,7 +37,7 @@ class Raingauge():
         #avoid chattering
         time_now=time.time()
         diff = time_now - self.time_old
-        if diff <= 0.5:
+        if diff <= 1.1:
             return 1
          
         conn=sqlite3.connect(self.DBFILEPATH)
