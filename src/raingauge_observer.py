@@ -66,7 +66,7 @@ class RaingaugeLCD(Raingauge):
         time_now=datetime.now()
         self.aqm0802.clear()
         self.aqm0802.write_string("shutdown @"+time_now.strftime("%H:%M"))
-        res=subprocess.call('sudo /usr/sbin/shutdown +10', shell=True)
+        res=subprocess.call('sudo /usr/sbin/shutdown +1', shell=True)
         exit()
 
     def start_rain_observation_with_counter(self):
