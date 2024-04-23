@@ -1,9 +1,6 @@
 import time
 from datetime import datetime
-from datetime import timedelta
 import argparse
-import sys
-import os
 import subprocess
 
 from raingauge_manager import Raingauge
