@@ -47,3 +47,8 @@ class DeskLight:
         self.pi.callback(self.LIGHT_BUTTON_PIN, pigpio.RISING_EDGE, self.light_on_off)
         while True:
             sleep(1)
+
+
+if __name__ == "__main__":
+    light = DeskLight()
+    light.run()
