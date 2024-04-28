@@ -26,8 +26,9 @@ class DeskLight:
         self.last_light_button_pushtime = time()
 
     def shutdown(self, gpio, level, tick):
-        res = subprocess.call("sudo /usr/sbin/shutdown +1", shell=True)
-        exit()
+        # res = subprocess.call("sudo /usr/sbin/shutdown +1", shell=True)
+        # exit()
+        pass
 
     def light_on_off(self, gpio, level, tick):
         time_now = time()
@@ -45,8 +46,11 @@ class DeskLight:
     def run(self):
         self.pi.callback(self.SHUTDOWN_BUTTON_PIN, pigpio.RISING_EDGE, self.shutdown)
         self.pi.callback(self.LIGHT_BUTTON_PIN, pigpio.RISING_EDGE, self.light_on_off)
-        while True:
-            sleep(1)
+        try:
+            while True:
+                sleep(1)
+        except KeyboardInterrupt:
+            self.pi.stop()
 
 
 if __name__ == "__main__":
