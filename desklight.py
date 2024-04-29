@@ -28,6 +28,7 @@ class DeskLight:
             self.pi.write(self.GATE_PIN, pigpio.HIGH)
             sleep(0.5)
             self.pi.write(self.GATE_PIN, pigpio.LOW)
+            sleep(0.5)
         res = subprocess.call("sudo /usr/sbin/shutdown +1", shell=True)
         exit()
         pass
