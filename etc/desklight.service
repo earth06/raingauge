@@ -1,0 +1,11 @@
+[Unit]
+Description=run desklight  
+
+[Service]
+ExecStart=/home/oonishi/Git/raingauge/run_desklight.sh
+ExecStop=/bin/kill ${MAINPID}
+Restart=on-success
+
+[Install]
+WantedBy=default.target
+

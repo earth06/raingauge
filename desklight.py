@@ -6,8 +6,6 @@ LIGHT_BUTTON_PIN = 5
 SHUTDOWN_BUTTON_PIN = 6
 GATE_PIN = 20
 
-pigpio.HIGH
-
 
 class DeskLight:
     def __init__(self):
@@ -26,14 +24,19 @@ class DeskLight:
         self.last_light_button_pushtime = time()
 
     def shutdown(self, gpio, level, tick):
-        # res = subprocess.call("sudo /usr/sbin/shutdown +1", shell=True)
-        # exit()
+        for i in range(5):
+            self.pi.write(self.GATE_PIN, pigpio.HIGH)
+            sleep(0.5)
+            self.pi.write(self.GATE_PIN, pigpio.LOW)
+        res = subprocess.call("sudo /usr/sbin/shutdown +1", shell=True)
+        exit()
         pass
 
     def light_on_off(self, gpio, level, tick):
         time_now = time()
-        diff = time_now - self.last_light_button_pushtime()
-        if diff <= 1.1:
+        diff = time_now - self.last_light_button_pushtime
+        self.last_light_button_pushtime = time_now
+        if diff <= 0.25:
             return False
         # GPIOの状態を読み取る
         gate_state = self.pi.read(self.GATE_PIN)
